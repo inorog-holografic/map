@@ -3,18 +3,75 @@
 #include <string.h>
 #include <time.h>
 
-#define MAX_TASKURI 1000
+#define MAX_TASKS 1000
 #define MAX_TEXT 256
 
+//structura pentru un task
 typedef struct {
 	int id;
 	char titlu[MAX_TEXT];
 	char descriere[MAX_TEXT];
 	int prioritate; //de la 1 la 5
-	time_t data_limita;
+	char termen[11];
 	int complet; //0=complet si 1 incomplet
 }Task;
 
-Task heap[MAX_TASKURI];
-int dimensiune_heap = 0;
-int urmator_id = 1;
+//heap de taskuri
+typedef struct {
+	Task taskuri[MAX_TASKS];
+	int nr;//numar de taskuri;
+}Heap;
+
+Heap heap;
+int id_curent = 1;
+
+//compara taskuri, care are prooritate mai mare e mai important
+//daca prioritatea e la fel, cel care e mai apropiat e mai important
+
+int compara(Task a, Task b)
+{
+	if (a.prioritate != b.prioritate)
+		return a.prioritate > b.prioritate;
+	return strcmp(a.termen, b.termen) < 0;
+}
+
+//interschimbare 2 taskuri
+void swap(Task* a, Task* b) {
+	Task temp = *a;
+	*a = *b;
+	*b = temp;
+}
+
+//urcare in heap
+
+void heap_up(int idx){
+	while (idx > 0) {
+		int parinte = (idx - 1) / 2;//formula pt gasirea parintelui-integer division
+		if (compara(heap.taskuri[idx], heap.taskuri[parinte])) {
+			swap(&heap.taskuri[idx], &heap.taskuri[parinte]);
+			idx = parinte;
+		}else break;
+	}
+
+}
+
+//coborare in heap
+void heap_down(int idx) {
+	while (1) {
+		int st = 2 * idx + 1;//gasirea copilului din stanga
+		int dr = 2 * idx + 1;//gasirea copilului din dreapta dupa idx
+		int max = idx;
+
+		if (st < heap.nr && compara(heap.taskuri[st], heap.taskuri[max]))
+			max = st;
+		if (dr < heap.nr && compara(heap.taskuri[dr], heap.taskuri[max]))
+			max = dr;
+
+
+		if (max != idx) {
+			swap(&heap.taskuri[idx], &heap.taskuri[max]);
+			idx = max;
+		}else break;
+	
+	}
+}
