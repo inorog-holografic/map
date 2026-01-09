@@ -1,0 +1,20 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <time.h>
+
+#define MAX_TASKURI 1000
+#define MAX_TEXT 256
+
+typedef struct {
+	int id;
+	char titlu[MAX_TEXT];
+	char descriere[MAX_TEXT];
+	int prioritate; //de la 1 la 5
+	time_t data_limita;
+	int complet; //0=complet si 1 incomplet
+}Task;
+
+Task heap[MAX_TASKURI];
+int dimensiune_heap = 0;
+int urmator_id = 1;
