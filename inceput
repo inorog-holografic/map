@@ -300,3 +300,27 @@ int main(int argc, char **argv) {
         save_json();
         return 0;
     }
+
+
+//COMANDA FILTER 
+
+    if (strcmp(argv[1], "filter") == 0) {
+        if (get_arg(argc, argv, "--overdue")) {
+            filter_overdue();
+            return 0;
+        }
+        if (get_arg(argc, argv, "--today")) {
+            filter_today();
+            return 0;
+        }
+    }
+//COMANDA STATS
+    if (strcmp(argv[1], "stats") == 0) {
+        stats();
+        return 0;
+    }
+
+    printf("Comanda necunoscuta!");
+    return 0;
+}
+
