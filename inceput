@@ -160,3 +160,37 @@ void edit_task(int id, int prioritate) {
         }
     }
 }
+
+
+//FILTRARI
+
+void filter_overdue() {
+for (int i = 0; i < heap.nr; i++)
+if (!heap.taskuri[i].complet && este_overdue(heap.taskuri[i].termen))
+printf("OVERDUE: %s (%s)\n", heap.taskuri[i].titlu, heap.taskuri[i].termen);
+}
+
+
+void filter_today() {
+for (int i = 0; i < heap.nr; i++)
+if (este_today(heap.taskuri[i].termen))
+printf("TODAY: %s\n", heap.taskuri[i].titlu);
+}
+
+
+//STATISTICI
+
+void stats() {
+int total = heap.nr, comp = 0, over = 0;
+for (int i = 0; i < heap.nr; i++) {
+if (heap.taskuri[i].complet) comp++;
+if (este_overdue(heap.taskuri[i].termen)) over++;
+}
+
+
+printf("Statistici:\n");
+printf("Total: %d\n", total);
+printf("Complete: %d\n", comp);
+printf("Incomplete: %d\n", total - comp);
+printf("Overdue: %d\n", over);
+}
