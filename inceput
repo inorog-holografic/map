@@ -75,8 +75,8 @@ void heap_down(int idx) {
 	
 	}
 }
-//DATA si TIMP 
 
+//DATA si TIMP 
 
 //obtine data curenta sub forma yyyy-mm-dd
 void azi(char *buf) {
@@ -120,6 +120,11 @@ void add_task(char *titlu, char *desc, int prioritate, char *termen, char *tags)
     heap.nr++;
 
     printf("Task adaugat cu succes! ID: %d\n", t.id);
+	printf("Titlu: %s\n", t.titlu);
+	printf("Prioritate: %d (FOARTE URGENT)\n", t.prioritate);
+	printf("Termen: %s\n", t.termen);
+	printf("Tags: %s\n", t.tags);
+	printf("Lista salvata in tasks.json\n");
 }
 
 //listare task-uri (heapul este deja sortat logic) 
