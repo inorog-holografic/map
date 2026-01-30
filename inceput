@@ -194,3 +194,22 @@ printf("Complete: %d\n", comp);
 printf("Incomplete: %d\n", total - comp);
 printf("Overdue: %d\n", over);
 }
+
+//FISIERE
+
+void save_json() {
+FILE *f = fopen("tasks.json", "w");
+if (!f) return;
+
+fprintf(f, "[\n");
+for (int i = 0; i < heap.nr; i++) {
+Task t = heap.taskuri[i];
+fprintf(f,
+" {\"id\":%d,\"titlu\":\"%s\",\"desc\":\"%s\",\"prioritate\":%d,\"termen\":\"%s\",\"tags\":\"%s\",\"complet\":%d}",
+t.id, t.titlu, t.descriere, t.prioritate, t.termen, t.tags, t.complet);
+if (i < heap.nr - 1) fprintf(f, ",");
+fprintf(f, "\n");
+}
+fprintf(f, "]");
+fclose(f);
+}
