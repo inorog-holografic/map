@@ -75,3 +75,29 @@ void heap_down(int idx) {
 	
 	}
 }
+//DATA si TIMP 
+
+
+// obtine data curenta sub forma yyyy-mm-dd
+void azi(char *buf) {
+time_t now = time(NULL);
+struct tm *t = localtime(&now);
+sprintf(buf, "%04d-%02d-%02d",
+t->tm_year + 1900, t->tm_mon + 1, t->tm_mday);
+}
+
+
+//verifica daca termenul este depasit
+int este_overdue(char *termen) {
+char curent[11];
+azi(curent);
+return strcmp(termen, curent) < 0;
+}
+
+
+//verifica daca task-ul este pentru azi
+int este_today(char *termen) {
+char curent[11];
+azi(curent);
+return strcmp(termen, curent) == 0;
+}
