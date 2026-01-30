@@ -78,7 +78,7 @@ void heap_down(int idx) {
 //DATA si TIMP 
 
 
-// obtine data curenta sub forma yyyy-mm-dd
+//obtine data curenta sub forma yyyy-mm-dd
 void azi(char *buf) {
 time_t now = time(NULL);
 struct tm *t = localtime(&now);
@@ -95,9 +95,68 @@ return strcmp(termen, curent) < 0;
 }
 
 
-//verifica daca task-ul este pentru azi
+//verifica daca taskul este pentru azi
 int este_today(char *termen) {
 char curent[11];
 azi(curent);
 return strcmp(termen, curent) == 0;
+}
+
+//OPERATII TASK 
+
+//adaugare task 
+void add_task(char *titlu, char *desc, int prioritate, char *termen, char *tags) {
+    Task t;
+    t.id = id_curent++;
+    strcpy(t.titlu, titlu);
+    strcpy(t.descriere, desc);
+    strcpy(t.termen, termen);
+    strcpy(t.tags, tags);
+    t.prioritate = prioritate;
+    t.complet = 0;
+
+    heap.taskuri[heap.nr] = t;
+    heap_up(heap.nr);
+    heap.nr++;
+
+    printf("Task adaugat cu succes! ID: %d\n", t.id);
+}
+
+//listare task-uri (heapul este deja sortat logic) 
+void list_tasks() {
+    printf("ID | Titlu | Prioritate | Termen | Status\n");
+    printf("---------------------------------------------\n");
+    for (int i = 0; i < heap.nr; i++) {
+        printf("%d | %s | %d | %s | %s\n",
+               heap.taskuri[i].id,
+               heap.taskuri[i].titlu,
+               heap.taskuri[i].prioritate,
+               heap.taskuri[i].termen,
+               heap.taskuri[i].complet ? "Complet" : "Incomplet");
+    }
+}
+
+//marcare task complet 
+void complete_task(int id) {
+    for (int i = 0; i < heap.nr; i++) {
+        if (heap.taskuri[i].id == id) {
+            heap.taskuri[i].complet = 1;
+            printf("Task %d marcat complet!\n", id);
+            return;
+        }
+    }
+    printf("Task negasit!\n");
+}
+
+//editare prioritate
+void edit_task(int id, int prioritate) {
+    for (int i = 0; i < heap.nr; i++) {
+        if (heap.taskuri[i].id == id) {
+            heap.taskuri[i].prioritate = prioritate;
+            heap_down(i);
+            heap_up(i);
+            printf("Task %d editat!\n", id);
+            return;
+        }
+    }
 }
