@@ -87,7 +87,9 @@ pașii pentru a rula din docker :
    
    filtare :
      docker run --rm -it carolinaszoke/task_manager:1.0 filter --overdue
+   
      docker run --rm -it carolinaszoke/task_manager:1.0 filter --today
+   
      docker run --rm -it carolinaszoke/task_manager:1.0 filter --week
    
    statistici : docker run --rm -it carolinaszoke/task_manager:1.0 stats
