@@ -78,16 +78,21 @@ pașii pentru a rula din docker :
 
 3. EXEMPLE :
    adaugare task : (sudo) docker run --rm -it carolinaszoke/task_manager:1.0 add "Proiect ATAD" --priority 5 --due 2026-02-05 --desc "Test CLI" --tags "facultate,urgent"
+   
    listare : docker run --rm -it carolinaszoke/task_manager:1.0 list --sorted priority
+   
    complet : docker run --rm -it carolinaszoke/task_manager:1.0 complete --id 1
+   
    prioritate : docker run --rm -it carolinaszoke/task_manager:1.0 edit --id 1 --priority 4
+   
    filtare :
      docker run --rm -it carolinaszoke/task_manager:1.0 filter --overdue
      docker run --rm -it carolinaszoke/task_manager:1.0 filter --today
      docker run --rm -it carolinaszoke/task_manager:1.0 filter --week
+   
    statistici : docker run --rm -it carolinaszoke/task_manager:1.0 stats
 (--rm sterge containerul automat după ce se inchide;
---it : interactive+terminal permite utilizatorului să vadă outputul CLI)
+-it : interactive+terminal permite utilizatorului să vadă outputul CLI)
 
 
 
