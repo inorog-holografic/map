@@ -1,7 +1,7 @@
 Aplicația task manager este un CLI care face posibilă gestionarea task-urilor cu priorități,
 termene și tags. Am folosit structuri de date : heap (toate tasks sunt stocate într-un heap 
 pentru sortare automată după prioritate și termen.); structuri simple(Task cu campurile id, titlu,
-descriere, rpioritate, termen, tags, complet).
+descriere, prioritate, termen, tags, complet).
 Din punct de vedere al funcțiilor, avem : 
 1. add_task – adaugă un task nou în heap.
      parametri: titlu, descriere, prioritate de la 1 la 5, termen yyyy-mm-dd, tags.
