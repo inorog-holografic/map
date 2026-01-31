@@ -5,7 +5,7 @@
 
 #define MAX_TASKS 1000
 #define MAX_TEXT 256
-//!!!!!!
+//!
 void load_json();
 
 //structura pentru un task
@@ -15,7 +15,7 @@ typedef struct {
 	char descriere[MAX_TEXT];
 	int prioritate; //de la 1 la 5
 	char termen[11]; 
-    char tags[MAX_TEXT]; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    char tags[MAX_TEXT]; 
 	int complet; //0=incomplet si 1 complet
 }Task;
 
@@ -105,7 +105,7 @@ azi(curent);
 return strcmp(termen, curent) == 0;
 }
 
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+//!!
 int zile_ramase(char *termen) {
     struct tm t = {0};
     sscanf(termen, "%d-%d-%d", &t.tm_year, &t.tm_mon, &t.tm_mday);
@@ -118,7 +118,6 @@ int zile_ramase(char *termen) {
     return (int)((deadline - now) / (60 * 60 * 24));
 }
 
-//!!!!!!!!!!!!!!!!!!!!!!!!!!
 int este_week(char *termen) {
     int z = zile_ramase(termen);
     return z >= 0 && z <= 7;
@@ -132,7 +131,6 @@ char* prioritate_text(int p) {
     if (p == 2) return "SCAZUT";
     return "FOARTE SCAZUT";
 }
-
 
 
 //OPERATII TASK 
@@ -168,7 +166,7 @@ void list_tasks() {
 
     for (int i = 0; i < heap.nr; i++) {
         Task t = heap.taskuri[i];
-        printf("║ %-2d │ %-18s │ %-9d │ %-10s │ %-6s ║\n",
+        printf("| %-2d │ %-18s │ %-9d │ %-10s │ %-6s |\n",
                t.id,
                t.titlu,
                t.prioritate,
@@ -219,14 +217,12 @@ for (int i = 0; i < heap.nr; i++)
 if (este_today(heap.taskuri[i].termen))
 printf("TODAY: %s\n", heap.taskuri[i].titlu);
 }
-////!!!!!!!!!!!!!!!!!!!!!!!
+
 void filter_week() {
     for (int i = 0; i < heap.nr; i++)
         if (este_week(heap.taskuri[i].termen))
             printf("WEEK: %s (%s)\n", heap.taskuri[i].titlu, heap.taskuri[i].termen);
 }
-
-
 
 
 //STATISTICI
