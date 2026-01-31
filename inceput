@@ -137,6 +137,10 @@ char* prioritate_text(int p) {
 
 //adaugare task 
 void add_task(char *titlu, char *desc, int prioritate, char *termen, char *tags) {
+    if (heap.nr >= MAX_TASKS) {
+        printf("Prea multe task-uri!\n");
+        return;
+    }
     Task t;
     t.id = id_curent++;
     strcpy(t.titlu, titlu);
@@ -158,7 +162,6 @@ void add_task(char *titlu, char *desc, int prioritate, char *termen, char *tags)
 	printf("Lista salvata in tasks.json\n");
 }
 
-//listare task-uri (heapul este deja sortat logic) 
 void list_tasks() {
     printf("--------------------------------------------------------------\n");
     printf("|ID |          Titlu      | Prioritate|    Termen   | Status |\n");
@@ -191,6 +194,11 @@ void complete_task(int id) {
 
 //editare prioritate
 void edit_task(int id, int prioritate) {
+    if (prioritate < 1 || prioritate > 5) {
+        printf("Prioritate invalida! (1-5)\n");
+        return;
+    }
+
     for (int i = 0; i < heap.nr; i++) {
         if (heap.taskuri[i].id == id) {
             heap.taskuri[i].prioritate = prioritate;
@@ -214,13 +222,13 @@ printf("OVERDUE: %s (%s)\n", heap.taskuri[i].titlu, heap.taskuri[i].termen);
 
 void filter_today() {
 for (int i = 0; i < heap.nr; i++)
-if (este_today(heap.taskuri[i].termen))
+if (!heap.taskuri[i].complet && este_today(heap.taskuri[i].termen))
 printf("TODAY: %s\n", heap.taskuri[i].titlu);
 }
 
 void filter_week() {
     for (int i = 0; i < heap.nr; i++)
-        if (este_week(heap.taskuri[i].termen))
+        if (!heap.taskuri[i].complet && este_week(heap.taskuri[i].termen))
             printf("WEEK: %s (%s)\n", heap.taskuri[i].titlu, heap.taskuri[i].termen);
 }
 
@@ -231,7 +239,7 @@ void stats() {
 int total = heap.nr, comp = 0, over = 0;
 for (int i = 0; i < heap.nr; i++) {
 if (heap.taskuri[i].complet) comp++;
-if (este_overdue(heap.taskuri[i].termen)) over++;
+if (!heap.taskuri[i].complet && este_overdue(heap.taskuri[i].termen)) over++;
 }
 
 
@@ -285,6 +293,8 @@ void load_json() {
             t.tags,
             &t.complet) == 7) {
 
+           if (heap.nr >= MAX_TASKS)
+             break;
             heap.taskuri[heap.nr] = t;
             heap.nr++;
 
@@ -310,23 +320,30 @@ char* get_arg(int argc, char **argv, char *flag) {
     }
     return NULL;
 }
+int are_flag(int argc, char **argv, char *flag) {
+    for (int i = 1; i < argc; i++)
+        if (strcmp(argv[i], flag) == 0)
+            return 1;
+    return 0;
+}
+
 
 //MAIN - CLI REAL
 
 int main(int argc, char **argv) {
     heap.nr = 0;
-    load_json(); //!!!!!!!!!!!!!!!!!!!
+    load_json(); //!!
 
 
     //verificare comanda
     if (argc < 2) {
-        printf("Utilizare:");
+        printf("Utilizare:\n");
         printf(" ./task_manager add \"Titlu\" --priority N --due YYYY-MM-DD --desc \"text\" --tags \"tag1,tag2\"");
-        printf(" ./task_manager list");
-        printf(" ./task_manager complete --id N");
-        printf(" ./task_manager edit --id N --priority N");
-        printf(" ./task_manager filter --overdue | --today");
-        printf(" ./task_manager stats");
+        printf(" ./task_manager list\n");
+        printf(" ./task_manager complete --id N\n");
+        printf(" ./task_manager edit --id N --priority N\n");
+        printf(" ./task_manager filter --overdue | --today\n");
+        printf(" ./task_manager stats\n");
         return 0;
     }
 
@@ -356,7 +373,7 @@ int main(int argc, char **argv) {
 //COMANDA LIST
     if (strcmp(argv[1], "list") == 0) {
      if (get_arg(argc, argv, "--sorted")) {
-        // heap-ul deja e sortat logic
+        
      }
      list_tasks();
      return 0;
@@ -390,17 +407,17 @@ int main(int argc, char **argv) {
 
 
 //COMANDA FILTER 
-//!!!!!!!!!!!!!!!!!!!!!!!!!!!111
+
 if (strcmp(argv[1], "filter") == 0) {
-    if (get_arg(argc, argv, "--overdue")) {
+    if (are_flag(argc, argv, "--overdue")) {
         filter_overdue();
         return 0;
     }
-    if (get_arg(argc, argv, "--today")) {
+    if (are_flag(argc, argv, "--today")) {
         filter_today();
         return 0;
     }
-    if (get_arg(argc, argv, "--week")) {
+    if (are_flag(argc, argv, "--week")) {
         filter_week();
         return 0;
     }
