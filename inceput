@@ -5,6 +5,8 @@
 
 #define MAX_TASKS 1000
 #define MAX_TEXT 256
+//!!!!!!
+void load_json();
 
 //structura pentru un task
 typedef struct {
@@ -12,8 +14,9 @@ typedef struct {
 	char titlu[MAX_TEXT];
 	char descriere[MAX_TEXT];
 	int prioritate; //de la 1 la 5
-	char termen[11];
-	int complet; //0=complet si 1 incomplet
+	char termen[11]; 
+    char tags[MAX_TEXT]; //!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+	int complet; //0=incomplet si 1 complet
 }Task;
 
 //heap de taskuri
@@ -59,7 +62,7 @@ void heap_up(int idx){
 void heap_down(int idx) {
 	while (1) {
 		int st = 2 * idx + 1;//gasirea copilului din stanga
-		int dr = 2 * idx + 1;//gasirea copilului din dreapta dupa idx
+		int dr = 2 * idx + 2;//gasirea copilului din dreapta dupa idx
 		int max = idx;
 
 		if (st < heap.nr && compara(heap.taskuri[st], heap.taskuri[max]))
@@ -102,6 +105,36 @@ azi(curent);
 return strcmp(termen, curent) == 0;
 }
 
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+int zile_ramase(char *termen) {
+    struct tm t = {0};
+    sscanf(termen, "%d-%d-%d", &t.tm_year, &t.tm_mon, &t.tm_mday);
+    t.tm_year -= 1900;
+    t.tm_mon -= 1;
+
+    time_t deadline = mktime(&t);
+    time_t now = time(NULL);
+
+    return (int)((deadline - now) / (60 * 60 * 24));
+}
+
+//!!!!!!!!!!!!!!!!!!!!!!!!!!
+int este_week(char *termen) {
+    int z = zile_ramase(termen);
+    return z >= 0 && z <= 7;
+}
+
+
+char* prioritate_text(int p) {
+    if (p == 5) return "FOARTE URGENT";
+    if (p == 4) return "URGENT";
+    if (p == 3) return "MEDIU";
+    if (p == 2) return "SCAZUT";
+    return "FOARTE SCAZUT";
+}
+
+
+
 //OPERATII TASK 
 
 //adaugare task 
@@ -121,7 +154,7 @@ void add_task(char *titlu, char *desc, int prioritate, char *termen, char *tags)
 
     printf("Task adaugat cu succes! ID: %d\n", t.id);
 	printf("Titlu: %s\n", t.titlu);
-	printf("Prioritate: %d (FOARTE URGENT)\n", t.prioritate);
+	printf("Prioritate: %d (%s)\n", t.prioritate, prioritate_text(t.prioritate));//!!!!!!
 	printf("Termen: %s\n", t.termen);
 	printf("Tags: %s\n", t.tags);
 	printf("Lista salvata in tasks.json\n");
@@ -129,16 +162,21 @@ void add_task(char *titlu, char *desc, int prioritate, char *termen, char *tags)
 
 //listare task-uri (heapul este deja sortat logic) 
 void list_tasks() {
-    printf("ID | Titlu | Prioritate | Termen | Status\n");
-    printf("---------------------------------------------\n");
+    printf("--------------------------------------------------------------\n");
+    printf("|ID |          Titlu      | Prioritate|    Termen   | Status |\n");
+    printf("--------------------------------------------------------------\n");
+
     for (int i = 0; i < heap.nr; i++) {
-        printf("%d | %s | %d | %s | %s\n",
-               heap.taskuri[i].id,
-               heap.taskuri[i].titlu,
-               heap.taskuri[i].prioritate,
-               heap.taskuri[i].termen,
-               heap.taskuri[i].complet ? "Complet" : "Incomplet");
+        Task t = heap.taskuri[i];
+        printf("║ %-2d │ %-18s │ %-9d │ %-10s │ %-6s ║\n",
+               t.id,
+               t.titlu,
+               t.prioritate,
+               t.termen,
+               t.complet ? "OK" : "TODO");
     }
+
+    printf("---------------------------------------------------------------\n");
 }
 
 //marcare task complet 
@@ -181,6 +219,14 @@ for (int i = 0; i < heap.nr; i++)
 if (este_today(heap.taskuri[i].termen))
 printf("TODAY: %s\n", heap.taskuri[i].titlu);
 }
+////!!!!!!!!!!!!!!!!!!!!!!!
+void filter_week() {
+    for (int i = 0; i < heap.nr; i++)
+        if (este_week(heap.taskuri[i].termen))
+            printf("WEEK: %s (%s)\n", heap.taskuri[i].titlu, heap.taskuri[i].termen);
+}
+
+
 
 
 //STATISTICI
@@ -219,6 +265,45 @@ fprintf(f, "]");
 fclose(f);
 }
 
+
+void load_json() {
+    FILE *f = fopen("tasks.json", "r");
+    if (!f) return;
+
+    heap.nr = 0;
+
+    while (!feof(f)) {
+        Task t;
+        char line[1024];
+
+        if (!fgets(line, sizeof(line), f))
+            break;
+
+        if (sscanf(line,
+            " {\"id\":%d,\"titlu\":\"%[^\"]\",\"desc\":\"%[^\"]\",\"prioritate\":%d,\"termen\":\"%[^\"]\",\"tags\":\"%[^\"]\",\"complet\":%d}",
+            &t.id,
+            t.titlu,
+            t.descriere,
+            &t.prioritate,
+            t.termen,
+            t.tags,
+            &t.complet) == 7) {
+
+            heap.taskuri[heap.nr] = t;
+            heap.nr++;
+
+            if (t.id >= id_curent)
+                id_curent = t.id + 1;
+        }
+    }
+
+    fclose(f);
+
+    // reconstruim heap-ul
+    for (int i = heap.nr / 2 - 1; i >= 0; i--)
+        heap_down(i);
+}
+
 //PARSARE
 
 //cauta valoare dupa un flag cum ar fi priority 5
@@ -234,6 +319,8 @@ char* get_arg(int argc, char **argv, char *flag) {
 
 int main(int argc, char **argv) {
     heap.nr = 0;
+    load_json(); //!!!!!!!!!!!!!!!!!!!
+
 
     //verificare comanda
     if (argc < 2) {
@@ -272,9 +359,13 @@ int main(int argc, char **argv) {
 
 //COMANDA LIST
     if (strcmp(argv[1], "list") == 0) {
-        list_tasks();
-        return 0;
+     if (get_arg(argc, argv, "--sorted")) {
+        // heap-ul deja e sortat logic
+     }
+     list_tasks();
+     return 0;
     }
+
 
 //COMANDA COMPLETE
     if (strcmp(argv[1], "complete") == 0) {
@@ -303,24 +394,37 @@ int main(int argc, char **argv) {
 
 
 //COMANDA FILTER 
-
-    if (strcmp(argv[1], "filter") == 0) {
-        if (get_arg(argc, argv, "--overdue")) {
-            filter_overdue();
-            return 0;
-        }
-        if (get_arg(argc, argv, "--today")) {
-            filter_today();
-            return 0;
-        }
+//!!!!!!!!!!!!!!!!!!!!!!!!!!!111
+if (strcmp(argv[1], "filter") == 0) {
+    if (get_arg(argc, argv, "--overdue")) {
+        filter_overdue();
+        return 0;
     }
+    if (get_arg(argc, argv, "--today")) {
+        filter_today();
+        return 0;
+    }
+    if (get_arg(argc, argv, "--week")) {
+        filter_week();
+        return 0;
+    }
+
+    printf("Optiune filter necunoscuta!\n");
+    return 0;
+}
+
 //COMANDA STATS
     if (strcmp(argv[1], "stats") == 0) {
         stats();
         return 0;
     }
 
+    if (strcmp(argv[1], "export") == 0) {
+        save_json();
+        printf("Export realizat in tasks.json\n");
+        return 0;
+    }
+
     printf("Comanda necunoscuta!");
     return 0;
 }
-
